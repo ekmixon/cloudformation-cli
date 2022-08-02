@@ -57,9 +57,7 @@ class Uploader:
                 stack_id,
                 stack_id,
             )
-            raise UploadError(
-                "Failed to create or update the '{}' stack".format(stack_id)
-            ) from e
+            raise UploadError(f"Failed to create or update the '{stack_id}' stack") from e
 
         LOG.info(success_msg)
 
@@ -117,8 +115,9 @@ class Uploader:
                 self._wait_for_stack(
                     stack_id,
                     "stack_update_complete",
-                    "{} stack is up to date".format(stack_name),
+                    f"{stack_name} stack is up to date",
                 )
+
         except ClientError as e:
             LOG.debug(
                 "%s stack create " "resulted in unknown ClientError",
@@ -131,8 +130,9 @@ class Uploader:
             self._wait_for_stack(
                 stack_id,
                 "stack_create_complete",
-                "{} stack was successfully created".format(stack_name),
+                f"{stack_name} stack was successfully created",
             )
+
 
         return stack_id
 
@@ -150,8 +150,9 @@ class Uploader:
             # pylint: disable=W0707
             raise InvalidProjectError()
         stack_id = self._create_or_update_stack(
-            template, "{}-role-stack".format(resource_type)
+            template, f"{resource_type}-role-stack"
         )
+
         return self._get_stack_output(stack_id, EXECUTION_ROLE_ARN_OUTPUT_NAME)
 
     def upload(self, file_prefix, fileobj):
@@ -163,7 +164,7 @@ class Uploader:
         )
 
         timestamp = datetime.utcnow().isoformat(timespec="seconds").replace(":", "-")
-        key = "{}-{}.zip".format(file_prefix, timestamp)
+        key = f"{file_prefix}-{timestamp}.zip"
 
         LOG.debug("Uploading to '%s/%s'...", self.bucket_name, key)
         try:

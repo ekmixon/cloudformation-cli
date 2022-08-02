@@ -111,9 +111,7 @@ def escape_markdown(string):
     """Escapes the reserved Markdown characters."""
     if not string:
         return string
-    if string[0] in MARKDOWN_RESERVED_CHARACTERS:
-        return "\\{}".format(string)
-    return string
+    return f"\\{string}" if string[0] in MARKDOWN_RESERVED_CHARACTERS else string
 
 
 class Project:  # pylint: disable=too-many-instance-attributes,too-many-public-methods
@@ -166,7 +164,7 @@ class Project:  # pylint: disable=too-many-instance-attributes,too-many-public-m
 
     @property
     def configuration_schema_filename(self):
-        return "{}-configuration.json".format(self.hypenated_name)
+        return f"{self.hypenated_name}-configuration.json"
 
     @property
     def schema_path(self):
@@ -460,7 +458,7 @@ class Project:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         except FileNotFoundError as e:
             self._raise_invalid_project("Resource schema not found.", e)
         except SpecValidationError as e:
-            msg = "Resource schema is invalid: " + str(e)
+            msg = f"Resource schema is invalid: {str(e)}"
             self._raise_invalid_project(msg, e)
         LOG.info("Validating your resource schema...")
 
@@ -470,7 +468,7 @@ class Project:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         try:
             self._validate_fragments(template_fragment)
         except FragmentValidationError as e:
-            msg = "Invalid template fragment: " + str(e)
+            msg = f"Invalid template fragment: {str(e)}"
             self._raise_invalid_project(msg, e)
         self.schema = template_fragment.generate_schema()
         self.fragment_dir = template_fragment.fragment_dir
@@ -537,7 +535,7 @@ class Project:  # pylint: disable=too-many-instance-attributes,too-many-public-m
         if os.path.isdir(self.inputs_path):
             for filename in os.listdir(self.inputs_path):
                 absolute_path = self.inputs_path / filename
-                zip_file.write(absolute_path, INPUTS_FOLDER + "/" + filename)
+                zip_file.write(absolute_path, f"{INPUTS_FOLDER}/{filename}")
                 LOG.debug("%s found. Writing to package.", filename)
         else:
             LOG.debug("%s not found. Not writing to package.", INPUTS_FOLDER)
@@ -648,7 +646,7 @@ class Project:  # pylint: disable=too-many-instance-attributes,too-many-public-m
 
     def _set_docs_properties(  # noqa: C901
         self, propname, prop, proppath
-    ):  # pylint: disable=too-many-locals,too-many-statements
+    ):    # pylint: disable=too-many-locals,too-many-statements
         """method sets markdown for each property;
         1. Supports multiple types per property - done via flattened schema so `allOf`,
         `anyOf`, `oneOf` combined into a collection then method iterates to reapply
@@ -701,9 +699,7 @@ class Project:  # pylint: disable=too-many-instance-attributes,too-many-public-m
 
         # join multiple types
         def __join(item1, item2):
-            if not item1 or item2 == item1:
-                return item2
-            return "{}, {}".format(item1, item2)
+            return item2 if not item1 or item2 == item1 else "{}, {}".format(item1, item2)
 
         def __set_property_type(prop_type, single_type=True):
             nonlocal prop

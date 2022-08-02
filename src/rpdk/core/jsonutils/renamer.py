@@ -7,11 +7,9 @@ from .pointer import fragment_decode
 
 class RefRenamer:
     def __init__(self, renames=None):
-        self.renames = renames if renames else {}
+        self.renames = renames or {}
         # this generator never completes
-        self.names = (
-            name for name in ("schema{}".format(i) for i in count())
-        )  # pragma: no cover
+        self.names = iter(f"schema{i}" for i in count())
 
     def items(self):
         """Return all renames.

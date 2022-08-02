@@ -67,15 +67,14 @@ def get_cloudformation_exports(region_name, endpoint_url, role_arn):
     pages = paginator.paginate()
     exports = {}
     for page in pages:
-        exports.update({export["Name"]: export["Value"] for export in page["Exports"]})
+        exports |= {export["Name"]: export["Value"] for export in page["Exports"]}
     return exports
 
 
 def render_jinja(overrides_string, region_name, endpoint_url, role_arn):
     env = Environment(autoescape=True)
     parsed_content = env.parse(overrides_string)
-    variables = meta.find_undeclared_variables(parsed_content)
-    if variables:
+    if variables := meta.find_undeclared_variables(parsed_content):
         exports = get_cloudformation_exports(region_name, endpoint_url, role_arn)
         invalid_exports = variables - exports.keys()
         if len(invalid_exports) > 0:
@@ -86,10 +85,9 @@ def render_jinja(overrides_string, region_name, endpoint_url, role_arn):
             LOG.warning(invalid_exports_message, invalid_exports)
             return empty_override()
         overrides_template = Template(overrides_string)
-        to_return = json.loads(overrides_template.render(exports))
+        return json.loads(overrides_template.render(exports))
     else:
-        to_return = json.loads(overrides_string)
-    return to_return
+        return json.loads(overrides_string)
 
 
 def get_overrides(root, region_name, endpoint_url, role_arn):
@@ -135,7 +133,7 @@ def get_inputs(root, region_name, endpoint_url, value, role_arn):
     if not os.path.isdir(path):
         return None
 
-    file_prefix = INPUTS + "_" + str(value)
+    file_prefix = f"{INPUTS}_{str(value)}"
 
     directories = os.listdir(path)
     if len(directories) > 0:
@@ -150,9 +148,7 @@ def get_inputs(root, region_name, endpoint_url, value, role_arn):
                     overrides_raw = render_jinja(
                         f.read(), region_name, endpoint_url, role_arn
                     )
-                overrides = {}
-                for pointer, obj in overrides_raw.items():
-                    overrides[pointer] = obj
+                overrides = dict(overrides_raw.items())
                 inputs[input_type] = overrides
         return inputs
     return None
@@ -163,15 +159,13 @@ def get_type(file_name):
         return "CREATE"
     if "update" in file_name:
         return "UPDATE"
-    if "invalid" in file_name:
-        return "INVALID"
-    return None
+    return "INVALID" if "invalid" in file_name else None
 
 
 def get_marker_options(schema):
     lowercase_actions = {action.lower() for action in Action}
     excluded_actions = lowercase_actions - schema.get("handlers", {}).keys()
-    marker_list = ["not " + action for action in excluded_actions]
+    marker_list = [f"not {action}" for action in excluded_actions]
     return " and ".join(marker_list)
 
 
@@ -230,8 +224,7 @@ def invoke_test(args, project, overrides, inputs):
             LOG.debug("extra args: %s", args.passed_to_pytest)
             pytest_args.extend(args.passed_to_pytest)
         LOG.debug("pytest args: %s", pytest_args)
-        ret = pytest.main(pytest_args, plugins=[plugin])
-        if ret:
+        if ret := pytest.main(pytest_args, plugins=[plugin]):
             raise SysExitRecommendedError("One or more contract tests failed")
 
 

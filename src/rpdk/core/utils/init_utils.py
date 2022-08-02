@@ -20,21 +20,23 @@ def init_artifact_type(args=None):
         except WizardValidationError as error:
             print_error(error)
             artifact_type = input_with_validation(
-                "Do you want to develop a new {}?.".format(INPUT_TYPES_STRING),
+                f"Do you want to develop a new {INPUT_TYPES_STRING}?.",
                 validate_artifact_type,
             )
 
+
     else:
         artifact_type = input_with_validation(
-            "Do you want to develop a new {}?.".format(INPUT_TYPES_STRING),
+            f"Do you want to develop a new {INPUT_TYPES_STRING}?.",
             validate_artifact_type,
         )
+
 
     return artifact_type
 
 
 def print_error(error):
-    print(Style.BRIGHT, Fore.RED, str(error), Style.RESET_ALL, sep="")
+    print(Style.BRIGHT, Fore.RED, error, Style.RESET_ALL, sep="")
 
 
 def input_with_validation(prompt, validate, description=""):
@@ -62,7 +64,7 @@ def validate_artifact_type(value):
     if value.lower() in VALID_MODULES_REPRESENTATION:
         return ARTIFACT_TYPE_MODULE
     raise WizardValidationError(
-        "Please enter a value matching {}".format(INPUT_TYPES_STRING)
+        f"Please enter a value matching {INPUT_TYPES_STRING}"
     )
 
 

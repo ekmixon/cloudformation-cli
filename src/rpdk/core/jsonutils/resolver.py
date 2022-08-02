@@ -218,9 +218,7 @@ def base_class_from_ref(ref_path):
             return uppercase_first_letter(elem.rpartition("/")[2])
 
     raise ModelResolverError(
-        "Could not create a valid class from schema at '{}'".format(
-            fragment_encode(ref_path)
-        )
+        f"Could not create a valid class from schema at '{fragment_encode(ref_path)}'"
     )
 
 

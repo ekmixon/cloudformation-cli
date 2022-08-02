@@ -579,7 +579,7 @@ class ResourceClient:  # pylint: disable=too-many-instance-attributes
             LOG.debug(result)
             # pylint: disable=W1401
             regex = "__CFN_RESOURCE_START_RESPONSE__([\s\S]*)__CFN_RESOURCE_END_RESPONSE__"  # noqa: W605,B950 # pylint: disable=C0301
-            payload = json.loads(re.search(regex, result).group(1))
+            payload = json.loads(re.search(regex, result)[1])
         else:
             result = self._client.invoke(
                 FunctionName=self._function_name, Payload=payload.encode("utf-8")
@@ -601,7 +601,7 @@ class ResourceClient:  # pylint: disable=too-many-instance-attributes
         if not self.has_required_handlers():
             raise ValueError("Create/Read/Delete handlers are required")
         if assert_status not in [OperationStatus.SUCCESS, OperationStatus.FAILED]:
-            raise ValueError("Assert status {} not supported.".format(assert_status))
+            raise ValueError(f"Assert status {assert_status} not supported.")
 
         status, response = self.call(action, current_model, previous_model, **kwargs)
         if assert_status == OperationStatus.SUCCESS:

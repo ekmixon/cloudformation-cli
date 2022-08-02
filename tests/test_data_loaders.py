@@ -235,13 +235,7 @@ def test_load_resource_spec_file_object_has_name(tmpdir):
     assert actual == expected
 
 
-@pytest.mark.parametrize(
-    "ref_fn",
-    (
-        lambda server: server.url + "/bar",  # absolute
-        lambda _server: "./bar",  # relative
-    ),
-)
+@pytest.mark.parametrize("ref_fn", (lambda server: f"{server.url}/bar", lambda _server: "./bar"))
 def test_load_resource_spec_uses_id_if_id_is_set(ref_fn):
     @Request.application
     def application(_request):
@@ -250,9 +244,10 @@ def test_load_resource_spec_uses_id_if_id_is_set(ref_fn):
     with wsgi_serve(application) as server:
         schema = {
             **BASIC_SCHEMA,
-            "$id": server.url + "/foo",
+            "$id": f"{server.url}/foo",
             "properties": {"foo": {"$ref": ref_fn(server)}},
         }
+
         inlined = load_resource_spec(json_s(schema))
 
     assert inlined["remote"]["schema0"]["type"] == "string"

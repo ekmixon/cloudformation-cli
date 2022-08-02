@@ -19,14 +19,8 @@ def build_image(args):
 
     config = project.generate_image_build_config()
 
-    if args.executable:
-        executable_name = args.executable
-    else:
-        executable_name = config["executable_name"]
-
-    image_name = (
-        args.image_name if args.image_name else "-".join(project.type_info).lower()
-    )
+    executable_name = args.executable or config["executable_name"]
+    image_name = args.image_name or "-".join(project.type_info).lower()
 
     docker_client = docker.from_env()
     LOG.warning("Creating image with name '%s'", image_name)

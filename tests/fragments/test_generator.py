@@ -135,8 +135,7 @@ def test_template_fragment_with_empty_description(template_fragment):
 
 def __generate_schema(fragment_file_name, template_fragment):
     create_fragments_folder_with_template(fragment_file_name, template_fragment)
-    schema = template_fragment.generate_schema()
-    return schema
+    return template_fragment.generate_schema()
 
 
 def test_resolved_generated_schema_is_valid_against_metaschema(
@@ -348,7 +347,9 @@ def __assert_validation_throws_no_error(template_file_name, template_fragment):
 def create_fragments_folder_with_template(template_file_name, template_fragment):
     os.mkdir(template_fragment.fragment_dir)
     copyfile(
-        os.path.join(directory, "../data/sample_fragments/" + template_file_name),
+        os.path.join(
+            directory, f"../data/sample_fragments/{template_file_name}"
+        ),
         os.path.join(template_fragment.fragment_dir, template_file_name),
     )
 

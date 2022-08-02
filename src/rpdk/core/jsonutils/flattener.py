@@ -79,9 +79,7 @@ class JsonSchemaFlattener:
                 ref_parts = fragment_decode(ref_path)
             except ValueError as e:
                 # pylint: disable=W0707
-                raise FlatteningError(
-                    "Invalid ref at path '{}': {}".format(ref_path, str(e))
-                )
+                raise FlatteningError(f"Invalid ref at path '{ref_path}': {str(e)}")
 
         ref_schema, ref_parts, _ref_parent = self._find_subschema_by_ref(ref_parts)
         return self._walk(ref_schema, ref_parts)
@@ -123,11 +121,12 @@ class JsonSchemaFlattener:
             pass
         else:
             # resolve each property schema
-            new_properties = {}
-            for prop_name, prop_schema in properties.items():
-                new_properties[prop_name] = self._walk(
+            new_properties = {
+                prop_name: self._walk(
                     prop_schema, path + ("properties", prop_name)
                 )
+                for prop_name, prop_schema in properties.items()
+            }
 
             # replace properties with resolved properties
             sub_schema["properties"] = new_properties
@@ -140,11 +139,13 @@ class JsonSchemaFlattener:
         except KeyError:
             pass
         else:
-            new_pattern_properties = {}
-            for pattern, prop_schema in pattern_properties.items():
-                new_pattern_properties[pattern] = self._walk(
+            new_pattern_properties = {
+                pattern: self._walk(
                     prop_schema, path + ("patternProperties", pattern)
                 )
+                for pattern, prop_schema in pattern_properties.items()
+            }
+
             sub_schema["patternProperties"] = new_pattern_properties
 
         return sub_schema
@@ -187,4 +188,4 @@ class JsonSchemaFlattener:
             return traverse(self._full_schema, ref_path)
         except (LookupError, ValueError):
             # pylint: disable=W0707
-            raise FlatteningError("Invalid ref: {}".format(ref_path))
+            raise FlatteningError(f"Invalid ref: {ref_path}")

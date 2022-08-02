@@ -45,13 +45,14 @@ class TemplateFragment:  # pylint: disable=too-many-instance-attributes
     def generate_schema(self):
         raw_fragments = read_raw_fragments(self.fragment_dir)
 
-        schema = {}
         properties = {}
 
-        schema["typeName"] = self.type_name
-        schema["description"] = "Schema for Module Fragment of type " + self.type_name
-        schema["properties"] = properties
-        schema["additionalProperties"] = True
+        schema = {
+            "typeName": self.type_name,
+            "description": f"Schema for Module Fragment of type {self.type_name}",
+            "properties": properties,
+            "additionalProperties": True,
+        }
 
         if "Parameters" in raw_fragments:
             properties["Parameters"] = self.__build_parameters(raw_fragments)
@@ -214,12 +215,11 @@ class TemplateFragment:  # pylint: disable=too-many-instance-attributes
 
     @staticmethod
     def __build_resources(raw_fragments):
-        raw_resources = {}
-        resources = {}
-        for resource in raw_fragments["Resources"]:
-            raw_resources[resource] = {
-                "type": raw_fragments["Resources"][resource]["Type"]
-            }
+        raw_resources = {
+            resource: {"type": raw_fragments["Resources"][resource]["Type"]}
+            for resource in raw_fragments["Resources"]
+        }
+
         resources_properties = {}
         for resource in raw_resources:
             type_object = {"type": "object", "properties": {}}
@@ -229,15 +229,15 @@ class TemplateFragment:  # pylint: disable=too-many-instance-attributes
             }
             type_object["properties"]["Properties"] = {"type": "object"}
             resources_properties[resource] = type_object
-        resources["properties"] = resources_properties
-        resources["type"] = "object"
-        resources["additionalProperties"] = False
-        return resources
+        return {
+            "properties": resources_properties,
+            "type": "object",
+            "additionalProperties": False,
+        }
 
     @staticmethod
     def __build_parameters(raw_fragments):
         raw_parameters = {}
-        parameters = {}
         for param in raw_fragments["Parameters"]:
             param_type = raw_fragments["Parameters"][param]["Type"]
 
@@ -247,9 +247,9 @@ class TemplateFragment:  # pylint: disable=too-many-instance-attributes
                 "description": description,
             }
         parameter_properties = {}
+        type_name = "object"
         for raw_param in raw_parameters:
             description = raw_parameters[raw_param]["description"]
-            type_name = "object"
             properties = {"Type": {"type": "string"}}
             required = ["Type"]
             parameter_properties[raw_param] = {
@@ -261,9 +261,7 @@ class TemplateFragment:  # pylint: disable=too-many-instance-attributes
                 parameter_properties[raw_param]["description"] = description
                 properties["Description"] = {"type": "string"}
                 required.append("Description")
-        parameters["type"] = "object"
-        parameters["properties"] = parameter_properties
-        return parameters
+        return {"type": "object", "properties": parameter_properties}
 
     def __write_schema(self, schema):
         def _write(f):
@@ -284,8 +282,7 @@ class TemplateFragment:  # pylint: disable=too-many-instance-attributes
 
     @staticmethod
     def __get_sample_fragment_json():
-        sample_json = resource_json(__name__, SAMPLE_FRAGMENT)
-        return sample_json
+        return resource_json(__name__, SAMPLE_FRAGMENT)
 
     def _create_fragment_directory(self):
         if not os.path.exists(self.fragment_dir):

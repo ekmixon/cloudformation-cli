@@ -36,9 +36,7 @@ POS_INF = float("inf")
 
 
 def terminate_regex(regex):
-    if regex.endswith("$"):
-        return regex[:-1] + r"\Z"
-    return regex
+    return regex[:-1] + r"\Z" if regex.endswith("$") else regex
 
 
 class ResourceGenerator:
@@ -79,23 +77,22 @@ class ResourceGenerator:
         json_type = schema.get("type", "object")
 
         if "const" in schema:
-            strategy = just(schema["const"])
+            return just(schema["const"])
         elif "enum" in schema:
             strategies = [just(item) for item in schema["enum"]]
-            strategy = one_of(*strategies)
+            return one_of(*strategies)
         elif json_type == "integer":
-            strategy = self.generate_integer_strategy(schema)
+            return self.generate_integer_strategy(schema)
         elif json_type == "number":
-            strategy = self.generate_float_strategy(schema)
+            return self.generate_float_strategy(schema)
         elif json_type == "boolean":
-            strategy = booleans()
+            return booleans()
         elif json_type == "string":
-            strategy = self.generate_string_strategy(schema)
+            return self.generate_string_strategy(schema)
         elif json_type == "array":
-            strategy = self.generate_array_strategy(schema)
+            return self.generate_array_strategy(schema)
         else:
-            strategy = self.generate_object_strategy(schema)
-        return strategy
+            return self.generate_object_strategy(schema)
 
     def generate_object_strategy(self, schema):
         try:

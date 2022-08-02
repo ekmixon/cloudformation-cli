@@ -67,7 +67,7 @@ def invoke(args):
             print(json.dumps({**payload_to_log}, indent=2))
 
             response = client._call(payload)
-            current_invocation = current_invocation + 1
+            current_invocation += 1
             print("=== Handler response ===")
             print(json.dumps(response, indent=2))
             status = OperationStatus[response["status"]]

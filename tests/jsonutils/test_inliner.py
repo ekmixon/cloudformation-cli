@@ -82,7 +82,7 @@ def test_refinliner_remote_refs_simple_are_walked_and_inlined(httpserver):
     target = {"type": "string"}
     remote = {"nested": {"bar": target}}
     httpserver.serve_content(json.dumps(remote))
-    ref = httpserver.url + "#/nested/bar"
+    ref = f"{httpserver.url}#/nested/bar"
     inliner = make_inliner({"type": "object", "properties": {"foo": {"$ref": ref}}})
     schema = inliner.inline()
     assert schema["remote"]["schema0"]["nested"]["bar"] == target
@@ -96,7 +96,7 @@ def test_refinliner_remote_refs_circular_are_walked_and_inlined(httpserver):
     ref_a = "#/properties/foo"
     remote = {"nested": {"bar": {"$ref": BASE_URI + ref_a}}}
     httpserver.serve_content(json.dumps(remote))
-    ref_local = httpserver.url + "#/nested/bar"
+    ref_local = f"{httpserver.url}#/nested/bar"
     inliner = make_inliner(
         {"type": "object", "properties": {"foo": {"$ref": ref_local}}}
     )
@@ -112,7 +112,7 @@ def test_refinliner_remote_refs_on_filesystem_are_inlined(tmpdir):
     filename = tmpdir.mkdir("bar").join("remote.json")
     with filename.open("w", encoding="utf-8") as f:
         json.dump(remote, f)
-    base_uri = "file://{}/foo/".format(tmpdir.strpath)
+    base_uri = f"file://{tmpdir.strpath}/foo/"
     ref = "../bar/remote.json#/nested/bar"
     inliner = make_inliner(
         {"type": "object", "properties": {"foo": {"$ref": ref}}}, base_uri=base_uri
@@ -125,7 +125,7 @@ def test_refinliner_remote_refs_on_filesystem_are_inlined(tmpdir):
 
 def test_refinliner_rename_comment_is_added(httpserver):
     httpserver.serve_content(json.dumps({"type": "string"}))
-    local = {"$ref": httpserver.url + "#"}
+    local = {"$ref": f"{httpserver.url}#"}
     inliner = make_inliner(local)
     schema = inliner.inline()
     assert schema["remote"]["schema0"]["$comment"] == httpserver.url

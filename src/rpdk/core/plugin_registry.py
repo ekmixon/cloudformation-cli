@@ -15,12 +15,10 @@ def get_plugin_choices():
 
 
 def get_parsers():
-    parsers = {
+    return {
         entry_point.name: entry_point.load
         for entry_point in pkg_resources.iter_entry_points("rpdk.v1.parsers")
     }
-
-    return parsers
 
 
 def load_plugin(language):

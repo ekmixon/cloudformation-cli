@@ -52,7 +52,7 @@ def decorate(after=True):
                     response = func(*args, **kwargs)  # calling target function
                     response_arg = {"response": response}
 
-                kvargs = _rebind(decorator, func, *args, **{**kwargs, **response_arg})
+                kvargs = _rebind(decorator, func, *args, **kwargs | response_arg)
                 decorated_sig = signature(decorator)
                 bound_arguments = decorated_sig.bind(**kvargs)
                 decorator(

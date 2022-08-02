@@ -846,7 +846,7 @@ def test_submit_dry_run(project, is_type_configuration_available):
     # fmt: on
 
     mock_temp.assert_not_called()
-    mock_path.assert_called_with("{}.zip".format(project.hypenated_name))
+    mock_path.assert_called_with(f"{project.hypenated_name}.zip")
     mock_plugin.package.assert_called_once_with(project, ANY)
     mock_upload.assert_not_called()
 
@@ -862,15 +862,10 @@ def test_submit_dry_run(project, is_type_configuration_available):
     with zipfile.ZipFile(zip_path, mode="r") as zip_file:
         if is_type_configuration_available:
             file_set.add(CONFIGURATION_SCHEMA_UPLOAD_FILENAME)
-            assert set(zip_file.namelist()) == file_set
-        else:
-            assert set(zip_file.namelist()) == file_set
-
+        assert set(zip_file.namelist()) == file_set
         if is_type_configuration_available:
             file_set.add(CONFIGURATION_SCHEMA_UPLOAD_FILENAME)
-            assert set(zip_file.namelist()) == file_set
-        else:
-            assert set(zip_file.namelist()) == file_set
+        assert set(zip_file.namelist()) == file_set
         schema_contents = zip_file.read(SCHEMA_UPLOAD_FILENAME).decode("utf-8")
         assert schema_contents == CONTENTS_UTF8
         if is_type_configuration_available:
@@ -946,7 +941,7 @@ def test_submit_dry_run_modules(project):
     # fmt: on
 
     mock_temp.assert_not_called()
-    mock_path.assert_called_with("{}.zip".format(project.hypenated_name))
+    mock_path.assert_called_with(f"{project.hypenated_name}.zip")
     mock_plugin.package.assert_not_called()
     mock_upload.assert_not_called()
 

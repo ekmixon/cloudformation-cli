@@ -22,7 +22,7 @@ TYPE_NAME_REGEX = r"^[a-zA-Z0-9]{2,64}::[a-zA-Z0-9]{2,64}::[a-zA-Z0-9]{2,64}$"
 
 
 def print_error(error):
-    print(Style.BRIGHT, Fore.RED, str(error), Style.RESET_ALL, sep="")
+    print(Style.BRIGHT, Fore.RED, error, Style.RESET_ALL, sep="")
 
 
 def input_with_validation(prompt, validate, description=""):
@@ -45,12 +45,11 @@ def input_with_validation(prompt, validate, description=""):
 
 
 def validate_type_name(value):
-    match = re.match(TYPE_NAME_REGEX, value)
-    if match:
+    if match := re.match(TYPE_NAME_REGEX, value):
         return value
     LOG.debug("'%s' did not match '%s'", value, TYPE_NAME_REGEX)
     raise WizardValidationError(
-        "Please enter a resource type name matching '{}'".format(TYPE_NAME_REGEX)
+        f"Please enter a resource type name matching '{TYPE_NAME_REGEX}'"
     )
 
 
@@ -60,8 +59,9 @@ class ValidatePluginChoice:
         self.max = len(self.choices)
 
         pretty = "\n".join(
-            "[{}] {}".format(i, choice) for i, choice in enumerate(self.choices, 1)
+            f"[{i}] {choice}" for i, choice in enumerate(self.choices, 1)
         )
+
         self.message = (
             "Select a language for code generation:\n"
             + pretty

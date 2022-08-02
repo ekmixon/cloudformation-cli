@@ -27,7 +27,7 @@ def parse_resource_type(resource_type):
     """
     segments = resource_type.split("::")
     if len(segments) != 3:
-        raise ValueError("Resource type '{}' is invalid".format(resource_type))
+        raise ValueError(f"Resource type '{resource_type}' is invalid")
     return segments
 
 
@@ -110,9 +110,7 @@ def modified_from_action_type(action_type):
     >>> modified_from_action_type('')
     'false'
     """
-    if action_type == "write":
-        return "true"
-    return "false"
+    return "true" if action_type == "write" else "false"
 
 
 @register_filter
@@ -135,4 +133,4 @@ def package_prefix(full_package_name):
     package_segments = full_package_name.rpartition(".")
     if package_segments[0]:
         return package_segments[0]
-    raise ValueError("Package name '{}' is invalid".format(full_package_name))
+    raise ValueError(f"Package name '{full_package_name}' is invalid")

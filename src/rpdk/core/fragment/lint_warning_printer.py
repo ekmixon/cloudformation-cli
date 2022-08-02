@@ -10,19 +10,17 @@ LOG = logging.getLogger(__name__)
 
 
 def print_cfn_lint_warnings(fragment_dir):
-    lint_warnings = __get_cfn_lint_matches(fragment_dir)
-    if not lint_warnings:
-        LOG.warning("Module fragment is valid.")
-    else:
+    if lint_warnings := __get_cfn_lint_matches(fragment_dir):
         LOG.warning(
             "Module fragment might be valid, but there are "
             "warnings from cfn-lint "
             "(https://github.com/aws-cloudformation/cfn-python-lint):"
         )
         for lint_warning in lint_warnings:
-            print(
-                "\t{} (from rule {})".format(lint_warning.message, lint_warning.rule),
-            )
+            print(f"\t{lint_warning.message} (from rule {lint_warning.rule})")
+
+    else:
+        LOG.warning("Module fragment is valid.")
 
 
 def __get_cfn_lint_matches(fragment_dir):
@@ -47,7 +45,4 @@ def __get_cfn_lint_matches(fragment_dir):
     # Default region used by cfn-lint
     regions = ["us-east-1"]
 
-    # Runs Warning and Error rules
-    matches = cfnlint.core.run_checks(filepath, template, rules, regions)
-
-    return matches
+    return cfnlint.core.run_checks(filepath, template, rules, regions)

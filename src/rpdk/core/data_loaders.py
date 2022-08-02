@@ -128,14 +128,11 @@ def get_file_base_uri(file):
         )
         name = STDIN_NAME
 
-    if name == STDIN_NAME:
-        path = Path.cwd() / "-"  # fake file
-    else:
-        path = Path(name)
+    path = Path.cwd() / "-" if name == STDIN_NAME else Path(name)
     return path.resolve().as_uri()
 
 
-def load_resource_spec(resource_spec_file):  # pylint: disable=R # noqa: C901
+def load_resource_spec(resource_spec_file):    # pylint: disable=R # noqa: C901
     """Load a resource provider definition from a file, and validate it."""
     try:
         resource_spec = json.load(resource_spec_file)
@@ -250,15 +247,14 @@ instance types, lambda runtimes, partitions, regions, availability zones, etc. t
                 enum,
             )
 
-    non_ascii_chars = re.findall(
+    if non_ascii_chars := re.findall(
         r"[^ -~]", json.dumps(resource_spec, ensure_ascii=False)
-    )
-    if non_ascii_chars:
+    ):
         LOG.warning(
             "non-ASCII characters found in resource schema: %s", non_ascii_chars
         )
 
-    list_options = {
+    if list_options := {
         "maxresults",
         "maxrecords",
         "maxitems",
@@ -267,8 +263,7 @@ instance types, lambda runtimes, partitions, regions, availability zones, etc. t
         "nextpagetoken",
         "pagetoken",
         "paginationtoken",
-    } & set(map(str.lower, resource_spec.get("properties", [])))
-    if list_options:
+    } & set(map(str.lower, resource_spec.get("properties", []))):
         LOG.warning(
             "LIST API inputs like MaxResults, MaxRecords, MaxItems, NextToken, NextMarker, NextPageToken, PageToken, and Filters are not resource properties. \
 %s should not be present in resource schema",
@@ -281,12 +276,19 @@ instance types, lambda runtimes, partitions, regions, availability zones, etc. t
         resource_spec.get("conditionalCreateOnlyProperties", [])
     )
 
-    read_only_properties_intersection = read_only_properties & (
-        create_only_properties
-        | set(resource_spec.get("writeOnlyProperties", []))
-        | {"/properties/" + s for s in resource_spec.get("required", [])}
-    )
-    if read_only_properties_intersection:
+    if read_only_properties_intersection := (
+        read_only_properties
+        & (
+            (
+                create_only_properties
+                | set(resource_spec.get("writeOnlyProperties", []))
+                | {
+                    f"/properties/{s}"
+                    for s in resource_spec.get("required", [])
+                }
+            )
+        )
+    ):
         LOG.warning(
             "readOnlyProperties cannot be specified by customers and should not overlap with writeOnlyProperties, createOnlyProperties, or required: %s",
             read_only_properties_intersection,

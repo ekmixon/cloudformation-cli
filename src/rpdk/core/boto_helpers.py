@@ -54,8 +54,9 @@ def get_temporary_credentials(session, key_names=BOTO_CRED_KEYS, role_arn=None):
                 role_arn,
             )
             raise DownstreamError() from Exception(
-                "Could not assume specified role '{}'".format(role_arn)
+                f"Could not assume specified role '{role_arn}'"
             )
+
         temp = response["Credentials"]
         creds = (temp["AccessKeyId"], temp["SecretAccessKey"], temp["SessionToken"])
     else:

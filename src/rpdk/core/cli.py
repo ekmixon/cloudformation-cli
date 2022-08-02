@@ -44,7 +44,7 @@ def unittest_patch_setup_subparser(_subparsers, _parents):
     pass
 
 
-def main(args_in=None):  # pylint: disable=too-many-statements
+def main(args_in=None):    # pylint: disable=too-many-statements
     """The entry point for the CLI."""
     log = None
     try:
@@ -112,7 +112,7 @@ def main(args_in=None):  # pylint: disable=too-many-statements
         # For these operations, we don't want to swallow the exception
         log.debug("Caught downstream error", exc_info=e)
         print("=== Caught downstream error ===", file=sys.stderr)
-        print(str(e.__cause__), file=sys.stderr)
+        print(e.__cause__, file=sys.stderr)
         print("---", file=sys.stderr)
         print(
             "If debugging indicates this is a possible error with this program,",

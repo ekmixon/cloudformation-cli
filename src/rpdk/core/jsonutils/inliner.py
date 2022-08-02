@@ -77,7 +77,7 @@ class RefInliner(RefResolver):
                 continue
             LOG.debug("Inlining definitions from '%s' (%s)", rename, base_uri)
             global_defs[rename] = local_defs = {"$comment": base_uri}
-            local_defs.update(self.store[base_uri])
+            local_defs |= self.store[base_uri]
         if global_defs:
             self.schema["remote"] = global_defs
 
